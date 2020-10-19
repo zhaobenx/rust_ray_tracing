@@ -13,6 +13,14 @@ impl Vec3 {
         Vec3 { x: x, y: y, z: z }
     }
 
+    pub fn zero() -> Self {
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
+
     pub fn x(&self) -> Float {
         self.x
     }
@@ -61,12 +69,22 @@ impl ops::Add<Vec3> for Vec3 {
         Vec3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
+
+impl ops::AddAssign<Vec3> for Vec3 {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
+    }
+}
+
 impl ops::Sub<Vec3> for Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: Self) -> Self {
         Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
+
 impl ops::Sub<&Vec3> for &Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: &Vec3) -> Vec3 {
@@ -92,6 +110,14 @@ impl ops::Div<Vec3> for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: Self) -> Self {
         Vec3::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z)
+    }
+}
+
+impl ops::DivAssign<Float> for Vec3 {
+    fn div_assign(&mut self, rhs: Float) {
+        self.x /= rhs;
+        self.y /= rhs;
+        self.z /= rhs;
     }
 }
 
