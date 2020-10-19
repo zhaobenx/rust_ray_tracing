@@ -6,6 +6,14 @@ use ray::Ray;
 use std::time::Instant;
 use vec3::{Float, Vec3};
 
+/// 检测射线是否和球体有交汇
+/// 返回值为射线方向和球体的交点的长度是射线的`t`倍
+/// 如果不相交则返回-1，相交返回`t`
+/// 
+/// `oc` 为球心指向射线原点的射线
+/// `|oc - t*ray.direction()|^2 == r^2` 
+/// 展开即得关于t的二次方程，解之即得下面的abc
+/// 
 fn hit_sphere(center: &Vec3, radius: &Float, ray: &Ray) -> Float {
     let oc = ray.origin() - center;
     let a = ray.direction().dot(ray.direction());
