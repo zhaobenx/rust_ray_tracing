@@ -1,5 +1,7 @@
+use crate::material::*;
 use crate::ray::Ray;
 use crate::vec3::{Float, Vec3};
+use std::rc::Rc;
 
 pub struct HitRecord {
     /// 摄像机向量到交汇点的距离（长度的倍数）
@@ -8,14 +10,16 @@ pub struct HitRecord {
     pub point: Vec3,
     /// 法向量
     pub normal: Vec3,
+    pub material: Rc<dyn Material>,
 }
 
 impl HitRecord {
-    pub fn new() -> Self {
+    pub fn new(t: Float, point: Vec3, normal: Vec3, material: Rc<dyn Material>) -> Self {
         HitRecord {
-            t: 0.0,
-            point: Vec3::new(0.0, 0.0, 0.0),
-            normal: Vec3::new(0.0, 0.0, 0.0),
+            t,
+            point: point,
+            normal: normal,
+            material,
         }
     }
 }
@@ -27,11 +31,16 @@ pub trait Hittable {
 pub struct Sphere {
     center: Vec3,
     radius: Float,
+    material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: Float) -> Self {
-        Sphere { center, radius }
+    pub fn new(center: Vec3, radius: Float, material: Rc<dyn Material>) -> Self {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -48,7 +57,6 @@ impl Hittable for Sphere {
     /// 展开即得关于t的二次方程，解之即得下面的abc
     ///
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
-        let mut hit_record = HitRecord::new();
         let oc = ray.origin() - &self.center;
         let a = ray.direction().dot(ray.direction());
         let b = oc.dot(ray.direction());
@@ -57,16 +65,24 @@ impl Hittable for Sphere {
         if discriminant > 0.0 {
             let root1 = (-b - (b * b - a * c).sqrt()) / a;
             if root1 < t_max && root1 > t_min {
-                hit_record.t = root1;
-                hit_record.point = ray.point_at_parameter(&hit_record.t);
-                hit_record.normal = (hit_record.point - self.center) / self.radius;
+                let point = ray.point_at_parameter(&root1);
+                let hit_record = HitRecord::new(
+                    root1,
+                    point,
+                    (point - self.center) / self.radius,
+                    Rc::clone(&self.material),
+                );
                 return Some(hit_record);
             }
             let root2 = (-b + (b * b - a * c).sqrt()) / a;
             if root2 < t_max && root2 > t_min {
-                hit_record.t = root2;
-                hit_record.point = ray.point_at_parameter(&hit_record.t);
-                hit_record.normal = (hit_record.point - self.center) / self.radius;
+                let point = ray.point_at_parameter(&root2);
+                let hit_record = HitRecord::new(
+                    root2,
+                    point,
+                    (point - self.center) / self.radius,
+                    Rc::clone(&self.material),
+                );
                 return Some(hit_record);
             }
         }

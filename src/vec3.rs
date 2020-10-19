@@ -85,9 +85,23 @@ impl ops::Sub<Vec3> for Vec3 {
     }
 }
 
+impl ops::Sub<&Vec3> for Vec3 {
+    type Output = Vec3;
+    fn sub(self, rhs: &Self) -> Self {
+        Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
 impl ops::Sub<&Vec3> for &Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: &Vec3) -> Vec3 {
+        Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+impl ops::Sub<Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn sub(self, rhs: Vec3) -> Vec3 {
         Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
@@ -138,6 +152,13 @@ impl ops::Div<Float> for Vec3 {
 impl ops::Mul<Vec3> for Float {
     type Output = Vec3;
     fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
+    }
+}
+
+impl ops::Mul<&Vec3> for Float {
+    type Output = Vec3;
+    fn mul(self, rhs: &Vec3) -> Vec3 {
         Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
     }
 }

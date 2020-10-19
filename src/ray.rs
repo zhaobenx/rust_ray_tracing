@@ -16,7 +16,7 @@ impl Ray {
         &self.a
     }
 
-    pub fn direction(&self) ->& Vec3 {
+    pub fn direction(&self) -> &Vec3 {
         &self.b
     }
 
