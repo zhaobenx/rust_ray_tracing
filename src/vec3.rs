@@ -38,6 +38,10 @@ impl Vec3 {
         *self = *self / length;
     }
 
+    pub fn unit_vector(&self) -> Self {
+        *self / self.length()
+    }
+
     pub fn dot(&self, other: &Self) -> Float {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
