@@ -13,16 +13,18 @@ use ray::Ray;
 use std::time::Instant;
 use vec3::{Float, Vec3};
 
+/// 返回一个三维空间内的随机向量
+/// 首先筛选在以原点为球心半径小于1的球内的向量
+/// 这样能保证是均匀的分布
 fn random_in_uint_sphere() -> Vec3 {
     let mut rng = rand::thread_rng();
     loop {
-        let p =
-            2.0 * Vec3::new(
-                rng.gen_range(0.0, 1.0),
-                rng.gen_range(0.0, 1.0),
-                rng.gen_range(0.0, 1.0),
-            ) - Vec3::new(1.0, 1.0, 1.0);
-        if p.squared_length() >= 1.0 {
+        let p = Vec3::new(
+            rng.gen_range(-1.0, 1.0),
+            rng.gen_range(-1.0, 1.0),
+            rng.gen_range(-1.0, 1.0),
+        );
+        if p.squared_length() <= 1.0 {
             return p;
         }
     }
@@ -32,7 +34,10 @@ fn color(ray: &Ray, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
     match hit(world, ray, 0.0, Float::MAX) {
         Some(hit_record) => {
             let target = hit_record.point + hit_record.normal + random_in_uint_sphere();
-            0.5 * color(&Ray::new(hit_record.point, target - hit_record.point), world)
+            0.5 * color(
+                &Ray::new(hit_record.point, target - hit_record.point),
+                world,
+            )
         }
         None => {
             let t = 0.5 * (ray.direction().unit_vector().y() + 1.0);
@@ -42,6 +47,7 @@ fn color(ray: &Ray, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
 }
 
 fn main() {
+    println!("Start running...");
     let start = Instant::now();
     let width = 200;
     let height = 100;
