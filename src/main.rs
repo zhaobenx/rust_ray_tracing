@@ -31,7 +31,7 @@ fn random_in_uint_sphere() -> Vec3 {
 }
 
 fn color(ray: &Ray, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
-    match hit(world, ray, 0.0, Float::MAX) {
+    match hit(world, ray, 0.001, Float::MAX) {
         Some(hit_record) => {
             let target = hit_record.point + hit_record.normal + random_in_uint_sphere();
             0.5 * color(
@@ -67,6 +67,7 @@ fn main() {
             col += color(&ray, &world);
         }
         col /= ns as Float;
+        col = Vec3::new(col.x().sqrt(), col.y().sqrt(), col.z().sqrt());
         let r = (256.0 * col.x()) as u8;
         let g = (256.0 * col.y()) as u8;
         let b = (256.0 * col.z()) as u8;
@@ -74,6 +75,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter7.1.png").unwrap();
+    img.save("chapter7.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }
