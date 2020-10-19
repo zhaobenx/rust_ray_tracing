@@ -12,14 +12,27 @@ use rand::Rng;
 use ray::Ray;
 use std::time::Instant;
 use vec3::{Float, Vec3};
+
+fn random_in_uint_sphere() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    loop {
+        let p =
+            2.0 * Vec3::new(
+                rng.gen_range(0.0, 1.0),
+                rng.gen_range(0.0, 1.0),
+                rng.gen_range(0.0, 1.0),
+            ) - Vec3::new(1.0, 1.0, 1.0);
+        if p.squared_length() >= 1.0 {
+            return p;
+        }
+    }
+}
+
 fn color(ray: &Ray, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
     match hit(world, ray, 0.0, Float::MAX) {
         Some(hit_record) => {
-            0.5 * Vec3::new(
-                hit_record.normal.x() + 1.0,
-                hit_record.normal.y() + 1.0,
-                hit_record.normal.z() + 1.0,
-            )
+            let target = hit_record.point + hit_record.normal + random_in_uint_sphere();
+            0.5 * color(&Ray::new(hit_record.point, target - hit_record.point), world)
         }
         None => {
             let t = 0.5 * (ray.direction().unit_vector().y() + 1.0);
@@ -55,6 +68,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter6.png").unwrap();
+    img.save("chapter7.1.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }

@@ -3,9 +3,9 @@ use crate::vec3::{Float, Vec3};
 
 pub struct HitRecord {
     /// 摄像机向量到交汇点的距离（长度的倍数）
-    pub t: Float, 
+    pub t: Float,
     /// 交汇点
-    point: Vec3,
+    pub point: Vec3,
     /// 法向量
     pub normal: Vec3,
 }
