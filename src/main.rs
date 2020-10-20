@@ -19,7 +19,7 @@ use vec3::{Float, Vec3};
 
 fn ray_color(ray: &Ray, world: &Vec<Box<dyn Hittable>>, depth: i32) -> Vec3 {
     if depth < 0 {
-        Vec3::zero();
+        return Vec3::zero();
     }
 
     match hit(world, ray, 0.001, Float::MAX) {
@@ -50,8 +50,10 @@ fn main() {
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
     let material_ground = Rc::new(Lambertian::new(&Vec3::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Dielectric::new(1.5));
-    let material_left = Rc::new(Dielectric::new(1.5));
+    // let material_center = Rc::new(Dielectric::new(1.5));
+    // let material_left = Rc::new(Dielectric::new(1.5));
+    let material_center = Rc::new(Lambertian::new(&Vec3::new(0.7, 0.3, 0.3)));
+    let material_left = Rc::new(Metal::new(&Vec3::new(0.8, 0.8, 0.8), 0.3));
     let material_right = Rc::new(Metal::new(&Vec3::new(0.8, 0.6, 0.2), 1.0));
 
     world.push(Box::new(Sphere::new(
@@ -101,6 +103,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter10.2.png").unwrap();
+    img.save("chapter10.4.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }

@@ -21,7 +21,7 @@ impl Material for Lambertian {
     fn scatter(&self, _ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vec3, Ray)> {
         let target = hit_record.normal + random_unit_vector();
 
-        let scattered = Ray::new(hit_record.point, target - hit_record.point);
+        let scattered = Ray::new(hit_record.point, target);
         Some((self.albedo, scattered))
     }
 }

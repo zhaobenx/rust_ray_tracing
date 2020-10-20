@@ -24,7 +24,11 @@ impl HitRecord {
     //         front_face: true,
     //     }
     // }
-
+    
+    /// 新建一个碰撞检测
+    /// 
+    /// 设置表面是否为前面，通过视线和法向的夹角来确定
+    /// 保证这里的normal一定是和视线夹角大于180°
     pub fn new(
         t: Float,
         point: Vec3,
