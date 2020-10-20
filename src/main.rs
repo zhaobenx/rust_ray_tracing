@@ -44,37 +44,45 @@ fn main() {
     let height = (width as Float / aspect_ratio) as u32;
     let samples_per_pixel = 100;
     let max_depth = 50;
-    
-    #[allow(non_snake_case)]
-    let R = (std::f32::consts::PI / 4.0).cos();
 
     let mut rng = rand::thread_rng();
-    let camera = Camera::new(90.0, aspect_ratio);
+    let camera = Camera::new(
+        &Vec3::new(-2.0, 2.0, 1.0),
+        &Vec3::new(0.0, 0.0, -1.0),
+        &Vec3::new(0.0, 1.0, 0.0),
+        90.0,
+        aspect_ratio,
+    );
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
-    // let material_ground = Rc::new(Lambertian::new(&Vec3::new(0.8, 0.8, 0.0)));
-    // let material_center = Rc::new(Lambertian::new(&Vec3::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(Lambertian::new(&Vec3::new(0.0, 0.0, 1.0)));
-    let material_right = Rc::new(Lambertian::new(&Vec3::new(1.0, 0.0, 0.0)));
+    let material_ground = Rc::new(Lambertian::new(&Vec3::new(0.8, 0.8, 0.0)));
+    let material_center = Rc::new(Lambertian::new(&Vec3::new(0.1, 0.2, 0.5)));
+    let material_left = Rc::new(Dielectric::new(1.5));
+    let material_right = Rc::new(Metal::new(&Vec3::new(0.8, 0.6, 0.2), 0.0));
 
-    // world.push(Box::new(Sphere::new(
-    //     Vec3::new(0.0, -100.5, -1.0),
-    //     100.0,
-    //     material_ground,
-    // )));
-    // world.push(Box::new(Sphere::new(
-    //     Vec3::new(0.0, 0.0, -1.0),
-    //     0.5,
-    //     material_center,
-    // )));
     world.push(Box::new(Sphere::new(
-        Vec3::new(-R, 0.0, -1.0),
-        R,
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground,
+    )));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        material_center,
+    )));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left.clone(),
+    )));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        -0.45,
         material_left,
     )));
     world.push(Box::new(Sphere::new(
-        Vec3::new(R, 0.0, -1.0),
-        R,
+        Vec3::new(1.0, 0.0, -1.0),
+        0.5,
         material_right,
     )));
 
@@ -104,6 +112,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter11.1.png").unwrap();
+    img.save("chapter11.2.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }
