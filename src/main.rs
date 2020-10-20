@@ -46,13 +46,22 @@ fn main() {
     let max_depth = 50;
 
     let mut rng = rand::thread_rng();
+    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (lookfrom - lookat).length();
+    let aperture = 2.0;
+
     let camera = Camera::new(
-        &Vec3::new(-2.0, 2.0, 1.0),
-        &Vec3::new(0.0, 0.0, -1.0),
-        &Vec3::new(0.0, 1.0, 0.0),
+        &lookfrom,
+        &lookat,
+        &vup,
         20.0,
         aspect_ratio,
+        aperture,
+        dist_to_focus,
     );
+
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
     let material_ground = Rc::new(Lambertian::new(&Vec3::new(0.8, 0.8, 0.0)));
@@ -112,6 +121,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter11.3.png").unwrap();
+    img.save("chapter12.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }
