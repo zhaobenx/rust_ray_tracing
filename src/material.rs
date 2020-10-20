@@ -75,11 +75,22 @@ impl Material for Dielectric {
         };
 
         let unit_direction = ray_in.direction().unit_vector();
-        let refracted = refract(&unit_direction, &hit_record.normal, refraction_ratio);
+
+        let cos_theta = (-unit_direction).dot(&hit_record.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+        let direction;
+
+        if cannot_refract {
+            direction = reflect(&unit_direction, &hit_record.normal);
+        } else {
+            direction = refract(&unit_direction, &hit_record.normal, refraction_ratio);
+        }
 
         Some((
             Vec3::new(1.0, 1.0, 1.0),
-            Ray::new(hit_record.point, refracted),
+            Ray::new(hit_record.point, direction),
         ))
     }
 }
@@ -113,6 +124,7 @@ pub fn reflect(vector: &Vec3, normal: &Vec3) -> Vec3 {
     vector - 2.0 * vector.dot(normal) * normal
 }
 
+/// 折射
 pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: Float) -> Vec3 {
     let cos_theta = -uv.dot(n);
     let r_out_perp = etai_over_etat * (uv + cos_theta * n);
