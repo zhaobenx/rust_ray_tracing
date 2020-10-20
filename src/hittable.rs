@@ -11,17 +11,53 @@ pub struct HitRecord {
     /// 法向量
     pub normal: Vec3,
     pub material: Rc<dyn Material>,
+    pub front_face: bool,
 }
 
 impl HitRecord {
-    pub fn new(t: Float, point: Vec3, normal: Vec3, material: Rc<dyn Material>) -> Self {
+    // pub fn new(t: Float, point: Vec3, normal: Vec3, material: Rc<dyn Material>) -> Self {
+    //     HitRecord {
+    //         t,
+    //         point: point,
+    //         normal: normal,
+    //         material,
+    //         front_face: true,
+    //     }
+    // }
+
+    pub fn new(
+        t: Float,
+        point: Vec3,
+        outward_normal: Vec3,
+        material: Rc<dyn Material>,
+        ray: &Ray,
+    ) -> Self {
+        let front_face = ray.direction().dot(&outward_normal) < 0.0;
+        let normal = if front_face {
+            outward_normal
+        } else {
+            -outward_normal
+        };
+
         HitRecord {
             t,
-            point: point,
-            normal: normal,
+            point,
+            normal,
             material,
+            front_face,
         }
     }
+
+    // /// 设置表面是否为前面，通过视线和法向的夹角来确定
+    // /// 保证这里的normal一定是和视线夹角大于180°
+    // pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
+    //     self.front_face = ray.direction().dot(outward_normal) < 0.0;
+    //     self.normal = if self.front_face {
+    //         *outward_normal
+    //     } else {
+    //         -*outward_normal
+    //     }
+    // }
 }
 
 pub trait Hittable {
@@ -71,6 +107,7 @@ impl Hittable for Sphere {
                     point,
                     (point - self.center) / self.radius,
                     Rc::clone(&self.material),
+                    ray,
                 );
                 return Some(hit_record);
             }
@@ -82,6 +119,7 @@ impl Hittable for Sphere {
                     point,
                     (point - self.center) / self.radius,
                     Rc::clone(&self.material),
+                    ray,
                 );
                 return Some(hit_record);
             }

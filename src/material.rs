@@ -19,7 +19,7 @@ impl Lambertian {
 
 impl Material for Lambertian {
     fn scatter(&self, _ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vec3, Ray)> {
-        let target = hit_record.point + hit_record.normal + random_in_uint_sphere();
+        let target = hit_record.normal + random_unit_vector();
 
         let scattered = Ray::new(hit_record.point, target - hit_record.point);
         Some((self.albedo, scattered))
@@ -44,12 +44,43 @@ impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vec3, Ray)> {
         let reflected = reflect(&ray_in.direction().unit_vector(), &hit_record.normal);
 
-        let scattered = Ray::new(hit_record.point, reflected + self.fuzz * random_in_uint_sphere());
+        let scattered = Ray::new(
+            hit_record.point,
+            reflected + self.fuzz * random_in_uint_sphere(),
+        );
         if scattered.direction().dot(&hit_record.normal) > 0.0 {
             Some((self.albedo, scattered))
         } else {
             None
         }
+    }
+}
+
+pub struct Dielectric {
+    ir: Float,
+}
+
+impl Dielectric {
+    pub fn new(ir: Float) -> Self {
+        Dielectric { ir }
+    }
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Vec3, Ray)> {
+        let refraction_ratio = if hit_record.front_face {
+            1.0 / self.ir
+        } else {
+            self.ir
+        };
+
+        let unit_direction = ray_in.direction().unit_vector();
+        let refracted = refract(&unit_direction, &hit_record.normal, refraction_ratio);
+
+        Some((
+            Vec3::new(1.0, 1.0, 1.0),
+            Ray::new(hit_record.point, refracted),
+        ))
     }
 }
 
@@ -70,6 +101,21 @@ pub fn random_in_uint_sphere() -> Vec3 {
     }
 }
 
+fn random_unit_vector() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    let a = rng.gen_range(0.0, 2.0 * std::f32::consts::PI);
+    let z: Float = rng.gen_range(-1.0, 1.0);
+    let r = (1.0 - z * z).sqrt();
+    Vec3::new(r * a.cos(), r * a.sin(), z)
+}
+
 pub fn reflect(vector: &Vec3, normal: &Vec3) -> Vec3 {
     vector - 2.0 * vector.dot(normal) * normal
+}
+
+pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: Float) -> Vec3 {
+    let cos_theta = -uv.dot(n);
+    let r_out_perp = etai_over_etat * (uv + cos_theta * n);
+    let r_out_parallel = -(1.0 - r_out_perp.squared_length()).abs().sqrt() * n;
+    r_out_perp + r_out_parallel
 }
