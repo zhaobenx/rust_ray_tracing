@@ -67,6 +67,11 @@ fn main() {
     world.push(Box::new(Sphere::new(
         Vec3::new(-1.0, 0.0, -1.0),
         0.5,
+        material_left.clone(),
+    )));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        -0.4,
         material_left,
     )));
     world.push(Box::new(Sphere::new(
@@ -101,6 +106,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter10.4.png").unwrap();
+    img.save("chapter10.5.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }
