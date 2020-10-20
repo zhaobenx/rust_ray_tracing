@@ -50,7 +50,7 @@ fn main() {
         &Vec3::new(-2.0, 2.0, 1.0),
         &Vec3::new(0.0, 0.0, -1.0),
         &Vec3::new(0.0, 1.0, 0.0),
-        90.0,
+        20.0,
         aspect_ratio,
     );
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
@@ -112,6 +112,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter11.2.png").unwrap();
+    img.save("chapter11.3.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }
