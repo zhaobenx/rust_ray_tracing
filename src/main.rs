@@ -39,18 +39,18 @@ fn ray_color(ray: &Ray, world: &Vec<Box<dyn Hittable>>, depth: i32) -> Vec3 {
 fn main() {
     println!("Start running...");
     let start = Instant::now();
-    let aspect_ratio = 16.0 / 9.0;
-    let width = 400;
+    let aspect_ratio = 3.0 / 2.0;
+    let width = 1200;
     let height = (width as Float / aspect_ratio) as u32;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 500;
     let max_depth = 50;
 
     let mut rng = rand::thread_rng();
-    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
-    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let lookfrom = Vec3::new(13.0, 2.0, 3.0);
+    let lookat = Vec3::new(0.0, 0.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let dist_to_focus = (lookfrom - lookat).length();
-    let aperture = 2.0;
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
 
     let camera = Camera::new(
         &lookfrom,
@@ -62,38 +62,7 @@ fn main() {
         dist_to_focus,
     );
 
-    let mut world: Vec<Box<dyn Hittable>> = Vec::new();
-
-    let material_ground = Rc::new(Lambertian::new(&Vec3::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(&Vec3::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(Dielectric::new(1.5));
-    let material_right = Rc::new(Metal::new(&Vec3::new(0.8, 0.6, 0.2), 0.0));
-
-    world.push(Box::new(Sphere::new(
-        Vec3::new(0.0, -100.5, -1.0),
-        100.0,
-        material_ground,
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(0.0, 0.0, -1.0),
-        0.5,
-        material_center,
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0),
-        0.5,
-        material_left.clone(),
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0),
-        -0.45,
-        material_left,
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(1.0, 0.0, -1.0),
-        0.5,
-        material_right,
-    )));
+    let world = random_scene();
 
     let img = ImageBuffer::from_fn(width, height, |x, y| {
         let mut pixel_color = Vec3::zero();
@@ -121,6 +90,73 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter12.png").unwrap();
+    img.save("final.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
+}
+
+fn random_scene() -> Vec<Box<dyn Hittable>> {
+    let mut world: Vec<Box<dyn Hittable>> = Vec::new();
+    let mut rng = rand::thread_rng();
+    let material_ground = Rc::new(Lambertian::new(&Vec3::new(0.5, 0.5, 0.5)));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        material_ground,
+    )));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = rng.gen_range(0.0, 1.0);
+            let center = Vec3::new(
+                a as Float + 0.9 * rng.gen_range(0.0, 1.0),
+                0.2,
+                b as Float + 0.9 * rng.gen_range(0.0, 1.0),
+            );
+
+            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    // diffuse
+                    let albedo = Vec3::random() * Vec3::random();
+                    let sphere_material = Rc::new(Lambertian::new(&albedo));
+
+                    world.push(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                } else if choose_mat < 0.95 {
+                    // metal
+                    let albedo = Vec3::new(
+                        rng.gen_range(0.5, 1.0),
+                        rng.gen_range(0.5, 1.0),
+                        rng.gen_range(0.5, 1.0),
+                    );
+                    let fuzz = rng.gen_range(0.0, 0.5);
+                    let sphere_material = Rc::new(Metal::new(&albedo, fuzz));
+
+                    world.push(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                } else {
+                    // glass
+                    let sphere_material = Rc::new(Dielectric::new(1.5));
+                    world.push(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                }
+            }
+        }
+    }
+    let material1 = Rc::new(Dielectric::new(1.5));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(0.0, 1.0, 0.0),
+        1.0,
+        material1,
+    )));
+    let material2 = Rc::new(Lambertian::new(&Vec3::new(0.4, 0.2, 0.1)));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(-4.0, 1.0, 0.0),
+        1.0,
+        material2,
+    )));
+    let material3 = Rc::new(Metal::new(&Vec3::new(0.7, 0.6, 0.5), 0.0));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(4.0, 1.0, 0.0),
+        1.0,
+        material3,
+    )));
+
+    world
 }

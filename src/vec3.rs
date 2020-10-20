@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::ops;
 pub type Float = f32;
 
@@ -18,6 +19,15 @@ impl Vec3 {
             x: 0.0,
             y: 0.0,
             z: 0.0,
+        }
+    }
+
+    pub fn random() -> Self {
+        let mut rng = rand::thread_rng();
+        Vec3 {
+            x: rng.gen_range(0.0, 1.0),
+            y: rng.gen_range(0.0, 1.0),
+            z: rng.gen_range(0.0, 1.0),
         }
     }
 
