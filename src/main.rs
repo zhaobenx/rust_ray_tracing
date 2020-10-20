@@ -101,6 +101,6 @@ fn main() {
         image::Rgb([r, g, b])
     });
     let elapsed = start.elapsed();
-    img.save("chapter10.3.png").unwrap();
+    img.save("chapter10.4.png").unwrap();
     println!("Time spent: {} ms", elapsed.as_millis());
 }
